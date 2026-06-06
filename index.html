@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AuraTwo | Dual Bluetooth Audio Transmitter & Synced Streaming</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Plus Jakarta Sans', 'sans-serif'],
+                        display: ['Space Grotesk', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            dark: '#030303',
+                            card: '#0a0a0f',
+                            accent1: '#6366f1', /* Indigo */
+                            accent2: '#ec4899', /* Pink */
+                            accent3: '#3b82f6', /* Blue */
+                        }
+                    },
+                    animation: {
+                        'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                        'float': 'float 6s ease-in-out infinite',
+                        'glow': 'glow 3s ease-in-out infinite alternate',
+                    },
+                    keyframes: {
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0px)' },
+                            '50%': { transform: 'translateY(-10px)' },
+                        },
+                        glow: {
+                            '0%': { opacity: '0.4', filter: 'blur(40px)' },
+                            '100%': { opacity: '0.8', filter: 'blur(60px)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background-color: #030303;
+            color: #f3f4f6;
+            overflow-x: hidden;
+        }
+        /* Custom Glowing Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #030303;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #27272a;
+            border-radius: 9999px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #4f46e5;
+        }
+        .aura-gradient-text {
+            background: linear-gradient(135deg, #6366f1 10%, #a855f7 50%, #ec4899 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .aura-btn-gradient {
+            background: linear-gradient(135deg, #6366f1 0%, #d946ef 100%);
+        }
+        .glass-panel {
+            background: rgba(10, 10, 15, 0.7);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+        }
+        .glass-panel-interactive:hover {
+            border-color: rgba(99, 102, 241, 0.3);
+            box-shadow: 0 10px 30px -10px rgba(99, 102, 241, 0.15);
+        }
+        /* Grid background pattern */
+        .grid-bg {
+            background-size: 40px 40px;
+            background-image: 
+                linear-gradient(to right, rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+        }
+    </style>
+</head>
+<body class="font-sans antialiased">
+
+    <!-- Glowing Background Elements -->
+    <div class="absolute top-0 left-1/4 w-[500px] h-[500px] bg-indigo-600/10 rounded-full filter blur-[120px] pointer-events-none animate-pulse-slow"></div>
+    <div class="absolute top-1/3 right-1/4 w-[600px] h-[600px] bg-pink-600/10 rounded-full filter blur-[150px] pointer-events-none animate-float"></div>
+    <div class="absolute bottom-1/4 left-10 w-[450px] h-[450px] bg-blue-600/10 rounded-full filter blur-[100px] pointer-events-none"></div>
+
+    <!-- Header / Navbar -->
+    <header class="fixed top-0 left-0 w-full z-50 transition-all duration-300 border-b border-transparent" id="navbar">
+        <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
+            <!-- Logo -->
+            <a href="#" class="flex items-center gap-3 group">
+                <div class="relative w-20 h-10 flex items-center justify-center">
+                     <img src="assets/images/icon.png" alt="AuraTwo Icon" class="w-20 h-10 group-hover:scale-110 transition-transform duration-300 rounded-lg">
+                </div>
+                <span class="font-display font-bold text-2xl tracking-tight text-white group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-indigo-400 group-hover:to-pink-400 transition-all duration-300">AuraTwo</span>
+            </a>
+
+            <!-- Navigation Links -->
+            <nav class="hidden md:flex items-center gap-8 text-sm font-medium text-zinc-400">
+                <a href="#how-it-works" class="hover:text-white transition-colors">How It Works</a>
+                <a href="#features" class="hover:text-white transition-colors">Key Features</a>
+                <a href="#faq" class="hover:text-white transition-colors">FAQ</a>
+            </nav>
+
+            <!-- CTA Buttons -->
+            <div class="flex items-center gap-4">
+                <a href="#download" class="aura-btn-gradient hover:opacity-90 text-white px-5 py-2.5 rounded-full text-sm font-semibold transition-all shadow-lg shadow-indigo-500/10 hover:shadow-indigo-500/20">
+                    Download
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="relative pt-36 pb-20 md:pt-48 md:pb-32 px-6 grid-bg">
+        <div class="max-w-7xl mx-auto flex flex-col items-center text-center relative z-10">
+            <!-- Badge -->
+            <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-zinc-900 border border-zinc-800 text-xs font-semibold text-zinc-300 mb-8 animate-float">
+                <span class="flex h-2 w-2 relative">
+                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-pink-400 opacity-75"></span>
+                    <span class="relative inline-flex rounded-full h-2 w-2 bg-pink-500"></span>
+                </span>
+                Introducing dual-channel audio streaming
+            </div>
+
+            <!-- Heading -->
+            <h1 class="font-display font-extrabold text-4xl sm:text-6xl md:text-7xl leading-tight tracking-tight max-w-4xl mb-6">
+                One Device. <span class="aura-gradient-text">Two Bluetooth outputs.</span> Perfect Harmony.
+            </h1>
+
+            <!-- Subtitle -->
+            <p class="text-zinc-400 text-lg md:text-xl max-w-2xl mb-10 leading-relaxed font-light">
+                Break the limits of your system. Stream audio perfectly synced to two Bluetooth headphones, speakers, or receivers simultaneously with sub-millisecond precision.
+            </p>
+
+            <!-- Call to Actions -->
+            <div class="flex flex-col sm:flex-row gap-4 w-full justify-center px-4 max-w-md">
+                <a href="#download" class="aura-btn-gradient text-white px-8 py-4 rounded-2xl font-bold flex items-center justify-center gap-2 hover:opacity-95 transition-all shadow-xl shadow-indigo-500/20 text-base">
+                    <i data-lucide="download" class="w-5 h-5"></i>
+                    Download for Free
+                </a>
+            </div>
+
+            <!-- Platform support badges -->
+            <div class="mt-12 flex flex-wrap justify-center items-center gap-6 text-xs text-zinc-500 font-medium tracking-wide uppercase">
+                <span>Available for:</span>
+                <span class="flex items-center gap-1.5"><i data-lucide="laptop" class="w-4 h-4"></i> Windows 10/11</span>
+                <span class="flex items-center gap-1.5"><i data-lucide="smartphone" class="w-4 h-4"></i> Android 12+</span>
+            </div>
+
+            <!-- Floating visual mockup -->
+        
+    </section>
+
+    <!-- Problem & Solution Section -->
+    <section id="how-it-works" class="py-24 px-6 relative bg-zinc-950/40 border-t border-zinc-900">
+        <div class="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+            <!-- Left Panel: Problem & Visual -->
+            <div class="space-y-6 text-left">
+                <span class="text-xs font-mono text-zinc-500 tracking-widest uppercase block">The Problem</span>
+                <h2 class="text-3xl md:text-5xl font-bold font-display tracking-tight text-white leading-tight">
+                    Standard Bluetooth limits you to <span class="text-zinc-500 line-through">just one stream</span>.
+                </h2>
+                <p class="text-zinc-400 leading-relaxed font-light text-base md:text-lg">
+                    By default, operating systems restrict Bluetooth audio transmission to a single device. When you connect second headphones, the first cuts out. This makes it impossible to watch a movie with a friend in flight, share a gym playlist, or distribute sound around your room using multiple speakers.
+                </p>
+                <div class="p-6 rounded-2xl bg-zinc-900/40 border border-zinc-800 space-y-4">
+                    <div class="flex items-start gap-4">
+                        <div class="w-10 h-10 rounded-full bg-red-500/10 flex items-center justify-center shrink-0">
+                            <i data-lucide="x" class="w-5 h-5 text-red-400"></i>
+                        </div>
+                        <div>
+                            <h4 class="text-white font-bold">Standard Setup Limitation</h4>
+                            <p class="text-sm text-zinc-400">Audio lag, split outputs requiring expensive audio splitters, or total connection dropout.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Panel: AuraTwo's Engine Solution -->
+            <div class="space-y-6 text-left lg:border-l lg:border-zinc-800 lg:pl-16">
+                <span class="text-xs font-mono text-pink-500 tracking-widest uppercase block">The AuraTwo Fix</span>
+                <h2 class="text-3xl md:text-5xl font-bold font-display tracking-tight text-white leading-tight">
+                    Virtual Multi-routing Sync Engine.
+                </h2>
+                <p class="text-zinc-400 leading-relaxed font-light text-base md:text-lg">
+                    Our patent-pending background virtual sound driver replicates and compresses your system's master stream simultaneously. It utilizes separate low-latency hardware channels to send completely parallel packet bursts directly to both of your paired Bluetooth targets.
+                </p>
+                <div class="p-6 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 space-y-4">
+                    <div class="flex items-start gap-4">
+                        <div class="w-10 h-10 rounded-full bg-emerald-500/10 flex items-center justify-center shrink-0">
+                            <i data-lucide="check" class="w-5 h-5 text-emerald-400"></i>
+                        </div>
+                        <div>
+                            <h4 class="text-white font-bold">Aura-Sync Protocol</h4>
+                            <p class="text-sm text-zinc-400">Dynamically offsets audio clock speeds per device, keeping the acoustic output totally aligned to the microsecond.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+            <!-- Dialog Modal popup simulated inside index.html dynamically -->
+            <div id="device-picker-modal" class="hidden fixed inset-0 z-50 bg-brand-dark/80 backdrop-blur-md flex items-center justify-center p-4">
+                <div class="glass-panel w-full max-w-sm rounded-2xl border border-zinc-800 p-6 space-y-4">
+                    <div class="flex justify-between items-center">
+                        <h4 class="text-sm font-bold font-display text-white uppercase tracking-wider">Discovered Bluetooth</h4>
+                        <button id="close-modal-btn" class="text-zinc-500 hover:text-white transition-all"><i data-lucide="x" class="w-4 h-4"></i></button>
+                    </div>
+                    <p class="text-xs text-zinc-400">Click a target device to stream dynamically to Slot <span id="target-slot-text">1</span>.</p>
+                    <div id="devices-list" class="space-y-2 max-h-60 overflow-y-auto pr-1">
+                        <!-- Devices loaded with scan animation dynamically -->
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- Key Features Grid Section -->
+    <section id="features" class="py-24 px-6 relative bg-zinc-950/20 border-t border-zinc-900">
+        <div class="max-w-7xl mx-auto text-center space-y-16">
+            <div class="max-w-2xl mx-auto space-y-4">
+                <span class="text-xs font-mono text-zinc-500 tracking-widest uppercase block">Uncompromising Audio Tech</span>
+                <h2 class="text-3xl md:text-5xl font-bold font-display tracking-tight text-white">
+                    Engineered to sound together.
+                </h2>
+                <p class="text-zinc-400 font-light text-base md:text-lg">
+                    More than just standard streaming. AuraTwo optimizes every frequency packet for double the devices.
+                </p>
+            </div>
+
+            <!-- Features Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <!-- Feature 1 -->
+                <div class="p-8 rounded-2xl glass-panel glass-panel-interactive transition-all duration-300 text-left space-y-4">
+                    <div class="w-12 h-12 rounded-xl bg-indigo-500/10 flex items-center justify-center text-indigo-400">
+                        <i data-lucide="zap" class="w-6 h-6"></i>
+                    </div>
+                    <h3 class="text-xl font-bold font-display text-white">Aura-Sync Latency Shield</h3>
+                    <p class="text-zinc-400 text-sm font-light leading-relaxed">
+                        AuraSync matches latency discrepancies between differing Bluetooth standards (e.g. BT 5.0 and BT 5.3) so your left and right audio waves hit your ears at the exact same sub-millisecond index.
+                    </p>
+                </div>
+
+                <!-- Feature 2 -->
+                <div class="p-8 rounded-2xl glass-panel glass-panel-interactive transition-all duration-300 text-left space-y-4">
+                    <div class="w-12 h-12 rounded-xl bg-pink-500/10 flex items-center justify-center text-pink-400">
+                        <i data-lucide="sliders" class="w-6 h-6"></i>
+                    </div>
+                    <h3 class="text-xl font-bold font-display text-white">Dual-Channel EQ Presets</h3>
+                    <p class="text-zinc-400 text-sm font-light leading-relaxed">
+                        One user wants heavy bass, another wants crisp acoustic podcasts. Customize and save independent frequency curve maps per connected headset.
+                    </p>
+                </div>
+
+                <!-- Feature 3 -->
+                <div class="p-8 rounded-2xl glass-panel glass-panel-interactive transition-all duration-300 text-left space-y-4">
+                    <div class="w-12 h-12 rounded-xl bg-blue-500/10 flex items-center justify-center text-blue-400">
+                        <i data-lucide="battery" class="w-6 h-6"></i>
+                    </div>
+                    <h3 class="text-xl font-bold font-display text-white">Dynamic Battery Telemetry</h3>
+                    <p class="text-zinc-400 text-sm font-light leading-relaxed">
+                        Access raw telemetry directly from your desktop screen. Displays instant remaining capacity, audio codec types, and bitrates without diving into OS settings.
+                    </p>
+                </div>
+
+                <!-- Feature 4 -->
+                <div class="p-8 rounded-2xl glass-panel glass-panel-interactive transition-all duration-300 text-left space-y-4">
+                    <div class="w-12 h-12 rounded-xl bg-purple-500/10 flex items-center justify-center text-purple-400">
+                        <i data-lucide="laptop" class="w-6 h-6"></i>
+                    </div>
+                    <h3 class="text-xl font-bold font-display text-white">Background Overlays</h3>
+                    <p class="text-zinc-400 text-sm font-light leading-relaxed">
+                        Trigger AuraTwo with simple keyboard hotkeys. Quick floating volume controls adapt straight over your full-screen movies, gaming monitors, or design software.
+                    </p>
+                </div>
+
+                <!-- Feature 5 -->
+                <div class="p-8 rounded-2xl glass-panel glass-panel-interactive transition-all duration-300 text-left space-y-4">
+                    <div class="w-12 h-12 rounded-xl bg-orange-500/10 flex items-center justify-center text-orange-400">
+                        <i data-lucide="shuffle" class="w-6 h-6"></i>
+                    </div>
+                    <h3 class="text-xl font-bold font-display text-white">Flexible Audio Splitting</h3>
+                    <p class="text-zinc-400 text-sm font-light leading-relaxed">
+                        Need independent outputs? Route Chrome browser music into Headphones A, while sending Zoom/gaming chat audio strictly into Headphones B.
+                    </p>
+                </div>
+
+                <!-- Feature 6 -->
+                <div class="p-8 rounded-2xl glass-panel glass-panel-interactive transition-all duration-300 text-left space-y-4">
+                    <div class="w-12 h-12 rounded-xl bg-emerald-500/10 flex items-center justify-center text-emerald-400">
+                        <i data-lucide="lock" class="w-6 h-6"></i>
+                    </div>
+                    <h3 class="text-xl font-bold font-display text-white">Zero Cloud, Total Privacy</h3>
+                    <p class="text-zinc-400 text-sm font-light leading-relaxed">
+                        No accounts, no external tracking, and no telemetry uploads. Everything processed on your hardware natively. We protect your active voice calls and media patterns.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Use Cases/Gallery Section -->
+    <section class="py-24 px-6 relative bg-zinc-950/40 border-t border-zinc-900">
+        <div class="max-w-7xl mx-auto space-y-16">
+            <div class="max-w-2xl text-left space-y-4">
+                <span class="text-xs font-mono text-pink-500 tracking-widest uppercase block">Real-World Aura Sharing</span>
+                <h2 class="text-3xl md:text-5xl font-bold font-display tracking-tight text-white leading-tight">
+                    Perfect for sharing moments.
+                </h2>
+                <p class="text-zinc-400 font-light text-base md:text-lg">
+                    Discover some of the ways dual-streaming audio changes your workflow and entertainment routines.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <!-- Use Case 1 -->
+                <div class="relative group rounded-3xl overflow-hidden aspect-[4/3] border border-zinc-800 bg-zinc-900/40 p-8 flex flex-col justify-between">
+                    <div class="absolute inset-0 bg-gradient-to-t from-zinc-950 via-zinc-950/80 to-transparent z-10"></div>
+                    <div class="relative z-20">
+                        <span class="px-2.5 py-1 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/10 text-[10px] uppercase font-bold tracking-widest">Travel & Flights</span>
+                    </div>
+                    <div class="relative z-20 space-y-2">
+                        <h4 class="text-xl font-bold text-white font-display">Watch movies side-by-side</h4>
+                        <p class="text-zinc-400 text-sm font-light leading-relaxed">Hook two wireless over-ears into a single laptop in mid-air. Eliminate tangled wires and the need for analog splitters.</p>
+                    </div>
+                </div>
+
+                <!-- Use Case 2 -->
+                <div class="relative group rounded-3xl overflow-hidden aspect-[4/3] border border-zinc-800 bg-zinc-900/40 p-8 flex flex-col justify-between">
+                    <div class="absolute inset-0 bg-gradient-to-t from-zinc-950 via-zinc-950/80 to-transparent z-10"></div>
+                    <div class="relative z-20">
+                        <span class="px-2.5 py-1 rounded-full bg-pink-500/20 text-pink-300 border border-pink-500/10 text-[10px] uppercase font-bold tracking-widest">Home Audio</span>
+                    </div>
+                    <div class="relative z-20 space-y-2">
+                        <h4 class="text-xl font-bold text-white font-display">Dual-Room Playback</h4>
+                        <p class="text-zinc-400 text-sm font-light leading-relaxed">Transmit synced party background tracks to kitchen speakers and outdoor garden decks simultaneously with absolute alignment.</p>
+                    </div>
+                </div>
+
+                <!-- Use Case 3 -->
+                <div class="relative group rounded-3xl overflow-hidden aspect-[4/3] border border-zinc-800 bg-zinc-900/40 p-8 flex flex-col justify-between">
+                    <div class="absolute inset-0 bg-gradient-to-t from-zinc-950 via-zinc-950/80 to-transparent z-10"></div>
+                    <div class="relative z-20">
+                        <span class="px-2.5 py-1 rounded-full bg-blue-500/20 text-blue-300 border border-blue-500/10 text-[10px] uppercase font-bold tracking-widest">Gym Partners</span>
+                    </div>
+                    <div class="relative z-20 space-y-2">
+                        <h4 class="text-xl font-bold text-white font-display">Simultaneous Gym Workouts</h4>
+                        <p class="text-zinc-400 text-sm font-light leading-relaxed">Set matching heart-pounding audio loops in your own earsets with a friend, without cluttering the gym with loudspeakers.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FAQ Section -->
+    <section id="faq" class="py-24 px-6 relative bg-zinc-950">
+        <div class="max-w-4xl mx-auto space-y-16">
+            <div class="text-center space-y-4">
+                <span class="text-xs font-mono text-zinc-500 tracking-widest uppercase block">Still got questions?</span>
+                <h2 class="text-3xl md:text-5xl font-bold font-display tracking-tight text-white">Frequently Asked Questions</h2>
+            </div>
+
+            <div class="space-y-4">
+                <!-- FAQ Item 1 -->
+                <div class="glass-panel rounded-2xl border border-zinc-800/80 overflow-hidden transition-all duration-300">
+                    <button class="w-full p-6 text-left flex justify-between items-center text-white font-semibold hover:bg-zinc-900/20 transition-colors" onclick="toggleFaq(this)">
+                        <span>Does AuraTwo require specific Bluetooth transmitters or adapters?</span>
+                        <i data-lucide="chevron-down" class="w-5 h-5 text-zinc-400 transition-transform duration-300"></i>
+                    </button>
+                    <div class="max-h-0 overflow-hidden transition-all duration-300 ease-in-out">
+                        <p class="p-6 pt-0 text-zinc-400 text-sm leading-relaxed font-light border-t border-zinc-900">
+                            No external hardware adapters are required. AuraTwo uses your computer's built-in Bluetooth chip and handles multiple audio channels dynamically using an optimized software driver. It functions with standard BT 4.0, 5.0, 5.2, and 5.3 chips.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- FAQ Item 2 -->
+                <div class="glass-panel rounded-2xl border border-zinc-800/80 overflow-hidden transition-all duration-300">
+                    <button class="w-full p-6 text-left flex justify-between items-center text-white font-semibold hover:bg-zinc-900/20 transition-colors" onclick="toggleFaq(this)">
+                        <span>What is the latency level? Will videos drift out of lip-sync?</span>
+                        <i data-lucide="chevron-down" class="w-5 h-5 text-zinc-400 transition-transform duration-300"></i>
+                    </button>
+                    <div class="max-h-0 overflow-hidden transition-all duration-300 ease-in-out">
+                        <p class="p-6 pt-0 text-zinc-400 text-sm leading-relaxed font-light border-t border-zinc-900">
+                            Our proprietary **Aura-Sync Engine** aligns the timing packets. Video streams are delayed slightly in modern media players to compensate for Bluetooth latencies. This results in perfect lip-sync across all paired headphones, regardless of model differences.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- FAQ Item 3 -->
+                <div class="glass-panel rounded-2xl border border-zinc-800/80 overflow-hidden transition-all duration-300">
+                    <button class="w-full p-6 text-left flex justify-between items-center text-white font-semibold hover:bg-zinc-900/20 transition-colors" onclick="toggleFaq(this)">
+                        <span>Can I stream to more than two devices with AuraTwo?</span>
+                        <i data-lucide="chevron-down" class="w-5 h-5 text-zinc-400 transition-transform duration-300"></i>
+                    </button>
+                    <div class="max-h-0 overflow-hidden transition-all duration-300 ease-in-out">
+                        <p class="p-6 pt-0 text-zinc-400 text-sm leading-relaxed font-light border-t border-zinc-900">
+                            The standard edition supports stable simultaneous routing to **two connected devices**. High-performance systems running multi-channel USB Bluetooth adapters can unlock up to **four streams** using AuraTwo Pro features.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- FAQ Item 4 -->
+                <div class="glass-panel rounded-2xl border border-zinc-800/80 overflow-hidden transition-all duration-300">
+                    <button class="w-full p-6 text-left flex justify-between items-center text-white font-semibold hover:bg-zinc-900/20 transition-colors" onclick="toggleFaq(this)">
+                        <span>Is there support for AAC, AptX, and LDAC audio codecs?</span>
+                        <i data-lucide="chevron-down" class="w-5 h-5 text-zinc-400 transition-transform duration-300"></i>
+                    </button>
+                    <div class="max-h-0 overflow-hidden transition-all duration-300 ease-in-out">
+                        <p class="p-6 pt-0 text-zinc-400 text-sm leading-relaxed font-light border-t border-zinc-900">
+                            Yes. AuraTwo utilizes your native operating system audio stack, meaning high-end audio algorithms like Sony's LDAC, Qualcomm's aptX, and Apple's AAC are fully compatible.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Download / Call to Action Footer Section -->
+    <section id="download" class="py-24 px-6 relative bg-brand-dark overflow-hidden border-t border-zinc-900">
+        <!-- Intense Glow in background -->
+        <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[300px] bg-gradient-to-r from-indigo-500 to-pink-500 opacity-20 filter blur-[120px] pointer-events-none rounded-full"></div>
+
+        <div class="max-w-5xl mx-auto glass-panel rounded-3xl p-8 md:p-16 border border-zinc-800 text-center relative z-10 space-y-8">
+            <h2 class="font-display font-extrabold text-3xl sm:text-5xl leading-tight max-w-3xl mx-auto text-white">
+                Ready to unleash your audio? <span class="aura-gradient-text">Stream together.</span>
+            </h2>
+            <p class="text-zinc-400 text-base md:text-lg max-w-xl mx-auto font-light">
+                Download AuraTwo now. Share a movie, create custom audio zones, or match sounds across devices effortlessly. No registration required.
+            </p>
+
+            <!-- Download Buttons Grid -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-2xl mx-auto pt-4">
+                <!-- Windows -->
+                <!-- TODO: Replace WINDOWS_DOWNLOAD_URL_PLACEHOLDER with actual Windows .msi download URL -->
+                <a href="WINDOWS_DOWNLOAD_URL_PLACEHOLDER" class="p-5 rounded-2xl bg-zinc-900/80 border border-zinc-800 hover:border-pink-500/30 flex items-center justify-between group transition-all">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-xl bg-zinc-800 flex items-center justify-center text-white group-hover:text-pink-400 transition-colors">
+                            <i data-lucide="laptop" class="w-5 h-5"></i>
+                        </div>
+                        <div class="text-left">
+                            <p class="text-xs text-zinc-500">x64 / ARM64</p>
+                            <p class="text-sm font-bold text-white">Windows .msi</p>
+                        </div>
+                    </div>
+                    <i data-lucide="chevron-right" class="w-4 h-4 text-zinc-500 group-hover:text-pink-400 transition-all group-hover:translate-x-1"></i>
+                </a>
+
+                <!-- Android APK -->
+                <!-- TODO: Replace ANDROID_DOWNLOAD_URL_PLACEHOLDER with actual Android APK download URL -->
+                <a href="ANDROID_DOWNLOAD_URL_PLACEHOLDER" class="p-5 rounded-2xl bg-zinc-900/80 border border-zinc-800 hover:border-blue-500/30 flex items-center justify-between group transition-all">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-xl bg-zinc-800 flex items-center justify-center text-white group-hover:text-blue-400 transition-colors">
+                            <i data-lucide="smartphone" class="w-5 h-5"></i>
+                        </div>
+                        <div class="text-left">
+                            <p class="text-xs text-zinc-500">Companion Controller</p>
+                            <p class="text-sm font-bold text-white">Android APK</p>
+                        </div>
+                    </div>
+                    <i data-lucide="chevron-right" class="w-4 h-4 text-zinc-500 group-hover:text-blue-400 transition-all group-hover:translate-x-1"></i>
+                </a>
+            </div>
+
+            <!-- Download details -->
+            <div class="text-xs text-zinc-500 flex flex-wrap justify-center items-center gap-6 pt-4">
+                <span class="flex items-center gap-1.5"><i data-lucide="shield-check" class="w-4 h-4 text-emerald-400"></i> Signed & Verified Safe</span>
+                <span class="flex items-center gap-1.5"><i data-lucide="sparkles" class="w-4 h-4 text-indigo-400"></i> 100% Free - No Limitations</span>
+                <span class="flex items-center gap-1.5"><i data-lucide="heart" class="w-4 h-4 text-pink-400"></i> No Registration Required</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-brand-dark border-t border-zinc-900 py-12 px-6">
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
+            <!-- Brand -->
+            <div class="flex items-center gap-3">
+                <span class="font-display font-semibold text-lg text-white">AuraTwo</span>
+            </div>
+
+            <!-- Copyright -->
+            <p class="text-xs text-zinc-500">
+                &copy; <span id="current-year">2026</span> AuraTwo audio solutions. Built for exceptional stereo synchronization.
+            </p>
+
+            <!-- Social/Links -->
+            <div class="flex gap-6 text-xs text-zinc-400">
+                <a href="#" class="hover:text-white transition-all">Privacy Policy</a>
+                <a href="#" class="hover:text-white transition-all">Support</a>
+                <a href="#" class="hover:text-white transition-all">Terms of Use</a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- INTERACTIVE DEMO LOGIC (WEB AUDIO API & SIMULATOR ENGINE) -->
+    <script>
+        // Set year
+        document.getElementById('current-year').textContent = new Date().getFullYear();
+
+        // Lucide replacement
+        lucide.createIcons();
+
+        // Navbar blur on scroll
+        window.addEventListener('scroll', () => {
+            const navbar = document.getElementById('navbar');
+            if (window.scrollY > 20) {
+                navbar.classList.add('glass-panel', 'shadow-lg');
+                navbar.classList.remove('border-transparent');
+            } else {
+                navbar.classList.remove('glass-panel', 'shadow-lg');
+                navbar.classList.add('border-transparent');
+            }
+        });
+
+        // FAQ Collapse functionality
+        function toggleFaq(button) {
+            const content = button.nextElementSibling;
+            const icon = button.querySelector('[data-lucide="chevron-down"]');
+            
+            // Check if open
+            const isOpen = content.style.maxHeight !== '0px' && content.style.maxHeight !== '';
+
+            // Close all first to keep UI accordion style clean
+            document.querySelectorAll('#faq div.max-h-0, #faq div[style*="max-height"]').forEach(el => {
+                el.style.maxHeight = '0px';
+                el.previousElementSibling.querySelector('[data-lucide="chevron-down"]').style.transform = 'rotate(0deg)';
+            });
+
+            if (!isOpen) {
+                content.style.maxHeight = content.scrollHeight + 'px';
+                icon.style.transform = 'rotate(180deg)';
+            } else {
+                content.style.maxHeight = '0px';
+                icon.style.transform = 'rotate(0deg)';
+            }
+        }
+
+    </script>
+</body>
+</html>
